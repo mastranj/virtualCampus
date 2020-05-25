@@ -1,12 +1,14 @@
-import { withStyles } from '@material-ui/core/styles';
-import moment from 'moment';
+import { withStyles } from "@material-ui/core/styles";
+import moment from "moment";
 import React from "react";
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import myEventsList from '../assets/EventsData';
-import { CustomButton, EventCard, EventModal, MetaData, Template, Title } from '../components';
-import firebase from '../firebase';
-
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import myEventsList from "../assets/EventsData";
+import { CustomButton, EventCard, EventModal, MetaData, Template, Title } from "../components";
+// import * as firebase from "firebase/app";
+// import "firebase/auth";
+// import "firebase/firestore";
+import firebase from "../firebase";
 
 
 
@@ -18,7 +20,7 @@ const localizer = momentLocalizer(moment);
 const useStyles = () => ({
   addNewButton: {
     boxShadow: "none",
-    fontSize: 20,
+    fontSize: 20
   }
 
 });
@@ -59,24 +61,24 @@ class Events extends React.Component {
 
   formatTime(hours, min) {
     let h = hours > 12 ? hours - 12 : hours;
-    let m = min < 10 ? '0' + min.toString() : min.toString();
-    let add = hours > 12 ? 'PM' : 'AM';
-    return h + ':' + m + add
+    let m = min < 10 ? "0" + min.toString() : min.toString();
+    let add = hours > 12 ? "PM" : "AM";
+    return h + ":" + m + add;
   }
 
   attendEvent(ele) {
-    this.setState({ open: true, event: ele })
+    this.setState({ open: true, event: ele });
   }
 
   closeDo() {
-    this.setState({ open: false, count: 0 })
+    this.setState({ open: false, count: 0 });
   }
 
   eventPropStyles(event, start, end, isSelected) {
     let style = {
-      backgroundColor: '#2984ce'
+      backgroundColor: "#2984ce"
     };
-    return { style: style }
+    return { style: style };
   }
 
   EventDisplay = ({ event }) => (
@@ -90,45 +92,49 @@ class Events extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      <Template active={'schedule'}>
-        <MetaData title={'Events'} />
-        <Title color={'blue'}>ALL EVENTS</Title>
-        <div style={{ textAlign: 'center' }}>
-          <CustomButton href={'https://forms.gle/fzKvSZqkAVNN6cHY6'} text={'ADD NEW EVENT'}
-            style={{ marginTop: 20, marginBottom: 25 }} color={"orange"} size={"large"} />
+      <Template active={"schedule"}>
+        <MetaData title={"Events"} />
+        <div style={{ paddingLeft: '5%', paddingRight: '5%' }}>
+          <Title color={"blue"}>All Events</Title>
+          <div style={{ textAlign: "center" }}>
+            <CustomButton href={"https://forms.gle/fzKvSZqkAVNN6cHY6"} text={"ADD NEW EVENT"}
+              style={{ marginTop: 20, marginBottom: 25 }} color={"orange"} size={"large"} />
+          </div>
+          {this.state.displayEvents.length > 0 &&
+            <div style={{ marginBottom: "5%" }}>
+              <h3 style={{ textAlign: "left", color: "#F1945B", fontSize: "20px", fontWeight: 100 }}> MAY 2020</h3>
+              <div style={{ color: "#F1945B", backgroundColor: "#F1945B", height: 3 }} />
+              {this.state.displayEvents.map((ele) => {
+                if (ele.display) {
+                  return (<EventCard ele={ele} onClick={() => this.attendEvent(ele)} />);
+                }
+                return null;
+              })}
+            </div>}
+          <Calendar
+            views={["week", "day"]}
+            localizer={localizer}
+            scrollToTime={new Date()}
+            events={this.state.myEventsList}
+            defaultView={"week"}
+            startAccessor="startTime"
+            endAccessor="endTime"
+            allDayAccessor="allDay"
+            showMultiDayTimes
+            style={{ height: 550 }}
+            onSelectEvent={(event) => {
+              this.setState({ open: true, event });
+            }}
+            eventPropGetter={this.eventPropStyles}
+            components={{
+              event: this.EventDisplay
+            }}
+            formats={{ eventTimeRangeFormat: () => null }}
+          />
+          {this.state.open && <EventModal open={this.state.open} closeDo={this.closeDo} event={this.state.event} />}
         </div>
-        {this.state.displayEvents.length > 0 &&
-          <div style={{ marginBottom: '5%' }}>
-            <h3 style={{ textAlign: "left", color: '#F1945B', fontSize: "20px", fontWeight: 100 }} > MAY 2020</h3>
-            <div style={{ color: '#F1945B', backgroundColor: '#F1945B', height: 3 }} />
-            {this.state.displayEvents.map((ele) => {
-              if (ele.display) {
-                return (<EventCard ele={ele} onClick={() => this.attendEvent(ele)} />)
-              }
-              return null
-            })}
-          </div>}
-        <Calendar
-          views={['week', 'day']}
-          localizer={localizer}
-          scrollToTime={new Date()}
-          events={this.state.myEventsList}
-          defaultView={'week'}
-          startAccessor="startTime"
-          endAccessor="endTime"
-          allDayAccessor="allDay"
-          showMultiDayTimes
-          style={{ height: 550 }}
-          onSelectEvent={(event) => { this.setState({ open: true, event }) }}
-          eventPropGetter={this.eventPropStyles}
-          components={{
-            event: this.EventDisplay,
-          }}
-          formats={{ eventTimeRangeFormat: () => null }}
-        />
-        {this.state.open && <EventModal open={this.state.open} closeDo={this.closeDo} event={this.state.event} />}
       </Template>
-    )
+    );
   }
 }
 

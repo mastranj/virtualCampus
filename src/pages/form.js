@@ -28,9 +28,30 @@ class contactUs extends React.Component {
         this.handleClick = this.handleClick.bind(this);
     }
 
+    addEvent(newEventRef, emailData, eventData) {
+        emailData['text'] = emailData['text'].concat('\nClick here to approve this event: ', this.state.approvalUrl.concat(newEventRef.id))
+
+        newEventRef.set(eventData)
+            .then(ref => {
+                console.log("Document written", ref)
+
+                Axios.post('https://us-central1-columbia-virtual-campus.cloudfunctions.net/sendEmail', emailData)
+                    .then(res => {
+                        this.setState({ feedbackSubmit: true })
+                        console.log(res)
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error);
+            });
+    }
+
     handleClick() {
         console.log(this.state.from)
-        const data = {
+        const eventData = {
             // TODO this should be all the fields in the form
             from: this.state.from,
             subject: this.state.subject,
@@ -49,24 +70,7 @@ class contactUs extends React.Component {
         var newEventRef = db.collection('events').doc();
         console.log('new event ref id:', newEventRef.id);
 
-        emailData['text'] = emailData['text'].concat('\nClick here to approve this event: ', this.state.approvalUrl.concat(newEventRef.id))
-
-        newEventRef.set(data)
-            .then(ref => {
-                console.log("Document written", ref)
-
-                Axios.post('https://us-central1-columbia-virtual-campus.cloudfunctions.net/sendEmail', emailData)
-                    .then(res => {
-                        this.setState({ feedbackSubmit: true })
-                        console.log(res)
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
-            })
-            .catch(function (error) {
-                console.error("Error adding document: ", error);
-            });
+        this.addEvent(newEventRef, emailData, eventData);
     }
 
     render() {

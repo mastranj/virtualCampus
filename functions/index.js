@@ -31,7 +31,7 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
     const mailOptions = {
       from: req.body.from,
       replyTo: req.body.from,
-      to: 'columbiavirtualcampus@gmail.com',
+      to: req.body.to === undefined ? 'columbiavirtualcampus@gmail.com' : req.body.to,
       subject: req.body.subject,
       text: req.body.text,
       html: `<p>${req.body.text}</p>`

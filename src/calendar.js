@@ -5,7 +5,7 @@ const CALENDAR_ID = process.env.GATSBY_CALENDAR_ID;
 const API_KEY = process.env.GATSBY_API_KEY;
 let getUrl = `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&singleEvents=True`
 
-export function getEvents(callback) {
+export function getCalendarEvents(callback) {
     request
         .get(getUrl)
         .end((err, resp) => {

@@ -13,13 +13,18 @@
 </head>
 
 <body>
+    <div>
+        <p>Approve events for CVC.</p>
+        <p>Steps:</p>
+        <li>Enter the client id for CVC in the prompt if it appears.</li>
+        <li>Enter the API key for CVC in the prompt if it appears. This is done once per browser session.</li>
+        <li>Authenticate with the CVC email account by clicking the authorize button.</li>
+        <li>When the page loads or is reloaded, enter the JSON for
+            the event into the popup box and wait for the link to the event to appear
+            below.</li>
+    </div>
     <p>
-        Approve events for CVC. When the page loads or reloads, enter the JSON for
-        the event into the popup box and wait for the link to the event to appear
-        below. You may have to authenticate with the CVC email account first.
-    </p>
-    <p>
-        When you click on the link for the new event and view it on the CVC email,
+        Note: When you click on the link for the new event and view it on the CVC email,
         you may get a warning that the event couldn't be found. You should be able
         to see the event on the calendar anyways so you can safely ignore the
         warning.
@@ -30,15 +35,23 @@
     <p id="content" style="white-space: pre-wrap;"></p>
     <script type="text/javascript" xml:space="preserve">//<![CDATA[
         // Client ID and API key from the Developer Console
-        var CLIENT_ID = prompt("Enter client id");
-        var API_KEY = prompt("Enter API key");
+        var CLIENT_ID = localStorage.getItem("CLIENT_ID");
+        console.log("CLIENT ID " + CLIENT_ID);
+        var API_KEY = localStorage.getItem("API_KEY");
+        if (CLIENT_ID === null) {
+            CLIENT_ID = prompt("Enter client id");
+            localStorage.setItem("CLIENT_ID", CLIENT_ID);
+        }
 
+        if (API_KEY === null) {
+            API_KEY = prompt("Enter API key");
+            localStorage.setItem("API_KEY", API_KEY);
+        }
 
         // Array of API discovery doc URLs for APIs used by the quickstart
         var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
-        // Authorization scopes required by the API; multiple scopes can be
-        // included, separated by spaces.
+        // Authorization scopes required by the API.
         var SCOPES = "https://www.googleapis.com/auth/calendar";
         var CALENDAR_ID = "d56ga59rg84jrtarcpjl78p5no@group.calendar.google.com";
 

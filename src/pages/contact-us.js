@@ -4,7 +4,7 @@ import MessageIcon from "@material-ui/icons/Message";
 import PersonIcon from "@material-ui/icons/Person";
 import Axios from "axios";
 import React from "react";
-import { CustomButton, MetaData, Template, Title } from "../components";
+import { CustomButton, Template, Title } from "../components";
 import CustomInput from "../components/material-kit-components/CustomInput/CustomInput.js";
 import GridContainer from "../components/material-kit-components/Grid/GridContainer.js";
 import GridItem from "../components/material-kit-components/Grid/GridItem.js";
@@ -31,7 +31,7 @@ class contactUs extends React.Component {
       text: this.state.text
     }
 
-    Axios.post('https://us-central1-columbia-virtual-campus.cloudfunctions.net/sendEmail', data)
+    Axios.post("https://us-central1-columbia-virtual-campus.cloudfunctions.net/sendEmail", data)
       .then(res => {
         this.setState({ feedbackSubmit: true })
         console.log(res)
@@ -44,8 +44,7 @@ class contactUs extends React.Component {
 
   render() {
     return (
-      <Template active={"contact-us"}>
-        <MetaData title={"Contact Us"} />
+      <Template active={"contact-us"} title={"Contact Us"}>
         <Title color={'blue'}>Contact Us</Title>
         <div style={{ textAlign: "center" }}>
           Our Email: <a style={{ textAlign: "center", color: "#4284C8" }}

@@ -82,22 +82,7 @@ const manualSt = makeStyles(() => ({
     left: '0px',
     background: 'transparent',
   },
-  container: {
-    paddingTop: "50px",
-    paddingLeft: '3%',
-    paddingRight: '3%',
-    marginLeft: 0,
-    marginRight: 0,
-    background: "#FFFFFF",
-  },
-  main: {
-    paddingTop: 50,
-    height: '100%',
-    background: "#FFFFFF",
-    backgroundColor: "#FFFFFF",
-    position: "relative",
-    marginBottom: '100px'
-  },
+
 }));
 
 
@@ -108,7 +93,7 @@ export default function HomeDesktop() {
   return (
     <div style={{ background: "white" }}>
       <MetaData title={'Columbia Virtual Campus'} />
-      <CustomHeader active={''} brand={''} />
+      <CustomHeader active={''} brand={''}/>
       <div className={classNames(manual.landing)}>
         <div className={classNames(manual.landingText)}>
           <h1 className={classNames(manual.toAll, manual.toAllSecondary)}>
@@ -125,28 +110,23 @@ export default function HomeDesktop() {
       </div>
 
       <div style={{ marginBottom: "2.5vh", background: "transparent" }} />
-      <div className={manual.main} style={{ textAlign: 'left' }}>
-        <div className={manual.container} id="explore">
-          <div style={{ paddingLeft: '5%', paddingRight: '5%' }}>
-            <Title color={"blue"}>Upcoming Events</Title>
-            <div style={{ textAlign: "center" }}>
-              <Subtitle color={'black'} className={manual.toAllSubHeadingUpEvents}>
-                Do you or your club want to host your own event on Columbia Virtual Campus?
+      <div className={classNames(classes.main, manual.eventsSection)} style={{ textAlign: 'left' }}>
+        <div className={classes.container} id="explore">
+          <Title color={"blue"}>Upcoming Events</Title>
+          <div style={{ textAlign: "center" }}>
+            <Subtitle color={'black'} className={manual.toAllSubHeadingUpEvents}>
+              Do you or your club want to host your own event on Columbia Virtual Campus?
                   <br /> Answer some short questions to get started!
                 </Subtitle>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <CustomButton href={'https://forms.gle/fzKvSZqkAVNN6cHY6'} text={'HOST A NEW EVENT'}
-                color={"orange"} size={"large"} />
-              <div style={{ marginBottom: "40px" }} />
-            </div>
-
-            <HomeEvents />
-            <div style={{ marginBottom: "100px" }} />
           </div>
+          <div style={{ textAlign: 'center' }}>
+            <CustomButton href={'/events/add-new-event'}  text={'HOST A NEW EVENT'}
+              color={"orange"} size={"large"} />
+            <div style={{ marginBottom: "40px" }} />
+          </div>
+          <HomeEvents />
+          <div style={{ marginBottom: "100px" }} />
         </div>
-
-
       </div>
     </div>
   )

@@ -26,9 +26,9 @@ It is developed using [Gatsby](https://www.gatsbyjs.org/docs/, "Gatsby"), a stat
 
 ### Creating Firebase Functions:
 1. Create a `.env` file in the `functions/` directory.
-2. Edit the file to contain: 
-`EMAIL=columbiavirtualcampus@gmail.com`
-`PASSWORD=<Ask on Slack for this information>`
+2. Edit `.env` to contain:  \
+`EMAIL=columbiavirtualcampus@gmail.com` \
+`PASSWORD=<Ask on Slack for this information>` 
 3. Run `$ npm install -g firebase-tools`.
 4. While in the `functions/` directory, run `$ firebase login` or `$ firebase login --no-localhost` if you are using the Docker container.
 5. Sign in with your email that is associated with the CVC firebase project on the browser to verify your firebase login. (Ask on Slack if you don't have access to the firebase project).

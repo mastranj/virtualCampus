@@ -229,6 +229,30 @@ class Events extends React.Component {
     return event;
   }
 
+  // TODO(claire): These are the new functions to use the Google Calendar API instead.
+  // TODO (claire): The new event attributes: https://developers.google.com/calendar/v3/reference/events#resource
+  // makeDisplayEvents(events) {
+  //   let arr = [];
+  //   for (let i = 0; i < events.length; i += 1) {
+  //     let ele = events[i];
+  //     if (ele.end > new Date().toISOString()) {
+  //       arr.push(ele);
+  //     }
+  //     if (arr.length === 5) {
+  //       break;
+  //     }
+  //   }
+  //   return arr;
+  // }
+
+  // async getEvents() {
+  //   getCalendarEvents((events) => {
+  //     this.setState({ myEventsList: events, displayEvents: this.makeDisplayEvents(events) });
+  //   })
+  // }
+
+
+
   makeDisplayEvents(events) {
     let arr = [];
     for (let i = 0; i < events.length; i += 1) {
@@ -243,33 +267,24 @@ class Events extends React.Component {
     return arr;
   }
 
-  // async componentDidMount() {
-  //   getCalendarEvents((events) => {
-  //     this.setState({ eventsData: events })
-  //   })
-  // }
-
-  // async getEvents() {
-  //   var db = firebase.firestore();
-  //   // var approvedEvents = await db.collection("events")
-  //   //   .where("approved", "==", true)
-  //   //   .orderBy("start_date", 'asc')
-  //   //   .get();
-  //   var approvedEvents = getCalendarEvents();
-  //   console.log("HERE");
-  //   console.log("APPROVED EVENTS");
-  //   let approvedEventsMap = [];
-  //   if (approvedEvents) {
-  //     // TODO
-  //     // MAY NEED TO CHANGE:
-  //     // the function this.convertEventsTime takes in an event's data, and uses the event.timezone
-  //     // and event.startTime or event.endTime (may need to change these names) to convert to user's local time
-  //     // However, convertEventsTime should be run on every event, converting the time and timezone of the event
-  //     // To the current user's local time!
-  //     approvedEventsMap = approvedEvents.docs.map(doc => this.convertEventsTime(doc.data()));
-  //   }
-  //   this.setState({ myEventsList: approvedEventsMap, displayEvents: this.makeDisplayEvents(approvedEventsMap) });
-  // }
+  async getEvents() {
+    var db = firebase.firestore();
+    var approvedEvents = await db.collection("events")
+      .where("approved", "==", true)
+      .orderBy("start_date", 'asc')
+      .get();
+    let approvedEventsMap = [];
+    if (approvedEvents) {
+      // TODO
+      // MAY NEED TO CHANGE:
+      // the function this.convertEventsTime takes in an event's data, and uses the event.timezone
+      // and event.startTime or event.endTime (may need to change these names) to convert to user's local time
+      // However, convertEventsTime should be run on every event, converting the time and timezone of the event
+      // To the current user's local time!
+      approvedEventsMap = approvedEvents.docs.map(doc => this.convertEventsTime(doc.data()));
+    }
+    this.setState({ myEventsList: approvedEventsMap, displayEvents: this.makeDisplayEvents(approvedEventsMap) });
+  }
 
   formatTime(hours, min) {
     let h = hours > 12 ? hours - 12 : hours;

@@ -8,6 +8,7 @@ import { CustomButton, EventCard, EventModal, Template, Title } from "../compone
 import firebase from "../firebase";
 
 
+
 const localizer = momentLocalizer(moment);
 const useStyles = () => ({
   addNewButton: {
@@ -242,33 +243,33 @@ class Events extends React.Component {
     return arr;
   }
 
-  async componentDidMount() {
-    var db = firebase.firestore();
+  // async componentDidMount() {
+  //   getCalendarEvents((events) => {
+  //     this.setState({ eventsData: events })
+  //   })
+  // }
 
-    var approvedEvents = await db.collection('events').where("approved", "==", true).get();
-    var approvedEventsMap = approvedEvents.docs.map(doc => doc.data())
-
-    this.setState({ eventsData: approvedEventsMap })
-  }
-
-  async getEvents() {
-    var db = firebase.firestore();
-    var approvedEvents = await db.collection("events")
-      .where("approved", "==", true)
-      .orderBy("start_date", 'asc')
-      .get();
-    let approvedEventsMap = [];
-    if (approvedEvents) {
-      // TODO
-      // MAY NEED TO CHANGE:
-      // the function this.convertEventsTime takes in an event's data, and uses the event.timezone
-      // and event.startTime or event.endTime (may need to change these names) to convert to user's local time
-      // However, convertEventsTime should be run on every event, converting the time and timezone of the event
-      // To the current user's local time!
-      approvedEventsMap = approvedEvents.docs.map(doc => this.convertEventsTime(doc.data()));
-    }
-    this.setState({ myEventsList: approvedEventsMap, displayEvents: this.makeDisplayEvents(approvedEventsMap) });
-  }
+  // async getEvents() {
+  //   var db = firebase.firestore();
+  //   // var approvedEvents = await db.collection("events")
+  //   //   .where("approved", "==", true)
+  //   //   .orderBy("start_date", 'asc')
+  //   //   .get();
+  //   var approvedEvents = getCalendarEvents();
+  //   console.log("HERE");
+  //   console.log("APPROVED EVENTS");
+  //   let approvedEventsMap = [];
+  //   if (approvedEvents) {
+  //     // TODO
+  //     // MAY NEED TO CHANGE:
+  //     // the function this.convertEventsTime takes in an event's data, and uses the event.timezone
+  //     // and event.startTime or event.endTime (may need to change these names) to convert to user's local time
+  //     // However, convertEventsTime should be run on every event, converting the time and timezone of the event
+  //     // To the current user's local time!
+  //     approvedEventsMap = approvedEvents.docs.map(doc => this.convertEventsTime(doc.data()));
+  //   }
+  //   this.setState({ myEventsList: approvedEventsMap, displayEvents: this.makeDisplayEvents(approvedEventsMap) });
+  // }
 
   formatTime(hours, min) {
     let h = hours > 12 ? hours - 12 : hours;

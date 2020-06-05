@@ -72,19 +72,30 @@ exports.sendZoomRequest = functions.https.onRequest(async (req, res) => {
     const request = require('request-promise');
 
       var db = admin.firestore();
+      var requestedZoomLink = false;
 
     // Check if we are creating a meeting. If we are we need to get info from database
-      /*if (req.query !== undefined && req.query.createMeetingForExistingEvent === true) {
+      /*console.log("--------------"+JSON.stringify(req.body)+"--------------")
+      if (req.body.query !== undefined && req.body.query.updateDatabase === true) {
 
-          db.collection('events').doc(req.query.eventId).get()
+          console.log("--------------"+req.body.query.eventId+"--------------")
+          db.collection('events').doc(req.body.query.eventId).get()
               .then(doc => {
+                  console.log("Got doc");
                   // eslint-disable-next-line promise/always-return
                   if (!doc.exists) {
                       console.log('No such document!');
                       return res.status(403).send("No such document exists in database!");
                   } else {
+                      console.log("----------------------------")
+                      console.log("----------------------------")
+                      console.log("----------------------------")
                       console.log('Document data:', doc.data());
+                      console.log("----------------------------")
+                      console.log("----------------------------")
+                      console.log("----------------------------")
                       const data = doc.data();
+                      requestedZoomLink = data.zoomLink;
                       const date = new Date(data.start_date.split("GMT")[0]);
                       req.body.start_time = date.getFullYear() + "-" + (date.getMonth() + 1)
                                         + "-" + date.getDate() + "T" + date.getHours() + ":" + date.getMinutes()
@@ -97,10 +108,18 @@ exports.sendZoomRequest = functions.https.onRequest(async (req, res) => {
               })
               .catch(err => {
                   console.log('Error getting document', err);
-                  return res.status(403).send("Could not get document in database to update");
+                  return res.status(403).send("Could not get document in database");
               });
+
+          if (requestedZoomLink === undefined) {
+              return res.status(400).send("User did not request a zoom link.")
+          } else if (requestedZoomLink !== true) {
+              return res.status(406).send("User already has a zoom link.")
+          }
+
       }*/
 
+      console.log("-----------------------------------")
     request.post(req.body,
         function (err, httpResponse, body) {
           console.log(err);
@@ -112,30 +131,55 @@ exports.sendZoomRequest = functions.https.onRequest(async (req, res) => {
           // Check if we need to update database
           /*if (req.body.query !== undefined) {
               if (req.body.query.updateDatabase === true) {
-
-                  if (req.query.zoomLink === true) {
-                      db.collection('events').doc(req.query.eventId).update({zoomLink: body.data.join_url})
+                      db.collection('events').doc(req.body.query.eventId).update({zoomLink: body.data.join_url})
                           .then(() => {
                               return res.status(200).send("success");
                           }).catch((err) => {
                           return res.status(500).send("Failed updating database: " + err);
                       });
-                  } else {
-                      if (req.query.zoomLink === undefined) {
-                          return res.status(400).send("User did not request a zoom link.")
-                      } else {
-                          return res.status(406).send("User already has a zoom link.")
-                      }
-                  }
 
               }
           }*/
 
-            console.log("Success! " + body);
           return res.status(200).send(body);
         }
     );
   })
+});
+
+exports.getEventInfoById = functions.https.onRequest((req, res) => {
+    cors(req,
+        res, () => {
+            /*if (req.method !== 'GET') {
+                console.log("Returned");
+                return;
+            }*/
+            var db = admin.firestore();
+            console.log(req.body.query)
+            db.collection('events').doc(req.query.eventId).get()
+                .then(doc => {
+                    console.log("Got doc");
+                    // eslint-disable-next-line promise/always-return
+                    if (!doc.exists) {
+                        console.log('No such document!');
+                        return res.status(403).send("No such document exists in database!");
+                    } else {
+                        console.log("----------------------------")
+                        console.log("----------------------------")
+                        console.log("----------------------------")
+                        console.log('Document data:', doc.data());
+                        console.log("----------------------------")
+                        console.log("----------------------------")
+                        console.log("----------------------------")
+                        const data = doc.data();
+                        return res.status(200).send(data);
+                    }
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return res.status(403).send("Could not get document in database");
+                });
+        });
 });
 
 exports.addZoomLinkToDB = functions.https.onRequest((req, res) => {
@@ -145,20 +189,20 @@ exports.addZoomLinkToDB = functions.https.onRequest((req, res) => {
                 return;
             }
             var db = admin.firestore();
-            if (req.query.zoomLink === true) {
+            //if (req.query.zoomLink === true) {
                 db.collection('events').doc(req.query.eventId).update({zoomLink: req.query.zoomLink})
                     .then(() => {
                         return res.status(200).send("success");
                     }).catch((err) => {
                         return res.status(500).send(err);
                     });
-            } else {
+            /*} else {
                 if (req.query.zoomLink === undefined) {
                     return res.status(400).send("User did not request a zoom link.")
                 } else {
                     return res.status(406).send("User already has a zoom link.")
                 }
-            }
+            }*/
         });
 });
 

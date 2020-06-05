@@ -2,6 +2,7 @@
 import React from "react";
 import Axios from "axios";
 import queryString from 'query-string';
+import firebase from "../../firebase";
 
 class HandleApprove extends React.Component {
 
@@ -11,15 +12,54 @@ class HandleApprove extends React.Component {
         this.state={
             state: 1,
             response: "Begin",
-            params: queryString.parse(this.props.location.search)
+            params: queryString.parse(this.props.location.search),
+            eventInfo: 0
         };
 
-        this.run = this.run.bind(this);
 
+        this.run = this.run.bind(this);
+    }
+
+
+    async getEventById(id) {
+        var db = firebase.firestore();
+        var approvedEvents = await db.collection("events")
+            .get()
+            .then(snapshot => {
+                if (snapshot.empty) {
+                    console.log('No matching documents.');
+                    this.setState({ eventInfo: 0 });
+                    return 0;
+                }
+
+                snapshot.forEach(doc => {
+                    if (doc.id === id) {
+                        console.log("here 2");
+                        console.log(doc.data())
+                        this.setState({ eventInfo: doc.data() });
+                        return doc.data();
+                    }
+                });
+            })
+            .catch(err => {
+                console.log('Error getting documents', err);
+                this.setState({ eventInfo: 0 });
+                return 0;
+            });
+    }
+    async updateZoomLink(id, zoomLink) {
+        var db = firebase.firestore();
+        var approvedEvents = await db.collection("events")
+            .doc(id).update({zoomLink: zoomLink})
+            .then(() => {
+                this.setState({response: "Zoom link created and zoom link put into database successfully! " + zoomLink})
+            }).catch((err) => {
+                this.setState({response: "Zoom link created but could not put into event in database. Link:" + zoomLink})
+            });
     }
 
     run() {
-        if (this.state.params.code === undefined) {
+        if (this.state.params === undefined || this.state.params.code === undefined) {
             this.setState({response: "404 Not Found"});
         //} else if (this.state.params.state === undefined) {
          //   this.setState({response: "Event not specified."});
@@ -49,43 +89,58 @@ class HandleApprove extends React.Component {
             // First get token
             Axios.post(requestUrl, requestTokenInfo)
                 .then(res => {
-                    console.log(res.data.access_token);
-                    console.log("sending create meeting request");
-                    var options = {
-                        method: 'POST',
-                        url: urlCreateMeeting,
-                        redirect_uri: redir_uri,
-                        headers: {
-                            'content-type': 'application/json',
-                            authorization: 'Bearer ' + res.data.access_token
-                        },
-                        /*query: {
-                            createMeetingForExistingEvent: true,
-                            updateDatabase: true,
-                            eventId: this.state.params.state
-                        },*/
-                        body: {
-                            topic: 'test',
-                            type: 2,
-                            start_time: "2020-06-03T019:17:00",
-                            duration: 1,
-                            timezone: 'America/New_York',
-                            password: 'test',
-                            agenda: 'test agenda'
-                        },
-                        json: true
-                    };
 
-                    // Second create zoom meeting with API
-                    Axios.post(requestUrl, options)
-                        .then(res => {
-                            console.log("Success: " + JSON.stringify(res));
-                            this.setState({response: "Success. Created zoom meeting:\n" + res.data.join_url});
-                        })
-                        .catch(error => {
-                            console.log("error: " + error);
-                            this.setState({response: "Failure! Could not add meeting: " + error})
-                        });
+                    // Check if we should create a meeting for event:
+                    this.getEventById(this.state.params.state).then(r => {
+                        const event = this.state.eventInfo;
+                        console.log("event info: " + event)
+
+                        if (event === 0) {
+                            this.setState({response: "Event does not exist."})
+                        } else
+                        if (event.zoomLink === true) {
+                            const date = new Date(event.start_date.split("GMT")[0]);
+                            var options = {
+                                method: 'POST',
+                                url: urlCreateMeeting,
+                                redirect_uri: redir_uri,
+                                headers: {
+                                    'content-type': 'application/json',
+                                    authorization: 'Bearer ' + res.data.access_token
+                                },
+                                query: {
+                                    createMeetingForExistingEvent: true,
+                                    updateDatabase: true,
+                                    eventId: this.state.params.state
+                                },
+                                body: {
+                                    type: 2,
+                                    start_time: date.getFullYear() + "-" + (date.getMonth() + 1)
+                                        + "-" + date.getDate() + "T" + date.getHours() + ":" + date.getMinutes()
+                                        + ":" + date.getSeconds(),
+                                    timezone: event.timezone.split("$")[0],
+                                    topic: event.event,
+                                    agenda: event.desc
+                                },
+                                json: true
+                            };
+                            console.log(JSON.stringify(options));
+                            // Second create zoom meeting with API
+                            Axios.post(requestUrl, options)
+                                .then(res => {
+                                    this.setState({response: "Success. Created zoom meeting:\n" + res.data.join_url
+                                                        + "\n\nAttempting to put into database..."});
+                                    this.updateZoomLink(this.state.params.state, res.data.join_url);
+                                })
+                                .catch(error => {
+                                    console.log("error: " + error);
+                                    this.setState({response: "Failure! Could not add meeting: " + error})
+                                });
+                        } else {
+                            this.setState({response: "This meeting did not request a zoom link or they have already been given one."})
+                        }
+
+                    });
                 })
                 .catch(error => {
                     console.log("error: " + error);

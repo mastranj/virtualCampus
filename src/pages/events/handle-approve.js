@@ -66,8 +66,9 @@ class HandleApprove extends React.Component {
         } else {
             const urlTokenAuth = 'https://zoom.us/oauth/token'
             const urlCreateMeeting = 'https://api.zoom.us/v2/users/columbiavirtualcampus@gmail.com/meetings'
-            const redir_uri = 'http://desktop-hnqifrq.local:3000/events/handle-approve'
-            const requestUrl = 'http://localhost:5001/columbia-virtual-campus/us-central1/sendZoomRequest'
+            const redir_uri = window.location.href.split("?")[0];
+            console.log(redir_uri);
+            const requestUrl = 'https://us-central1-columbia-virtual-campus.cloudfunctions.net/sendZoomRequest'
 
             const body = {
                 grant_type: "authorization_code",

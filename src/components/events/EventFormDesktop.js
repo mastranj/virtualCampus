@@ -370,10 +370,8 @@ class EventFormDesktop extends React.Component {
         + "<br><br>Click here to approve this event: ",
         approvalUrl.concat(newEventRef.id))
         + "\n<br> USER REQUESTED ZOOM LINK, click here to create zoom meeting: "
-          + zoomUrl.concat(newEventRef.id)  ;
-    console.log("In here");
+          + zoomUrl.concat(newEventRef.id) ;
     if (data["zoomLink"]) {
-      console.log("In here 2");
       emailData["text"].concat("\n<br> USER REQUESTED ZOOM LINK, click here to create zoom meeting: ",
           zoomUrl.concat(newEventRef.id));
     }
@@ -405,7 +403,7 @@ class EventFormDesktop extends React.Component {
       });
 
     if (data["zoomLink"]) {
-      sendZoomEmail(newEventRef.id, data["event"], from);
+      //sendZoomEmail(newEventRef.id, data["event"], from);
     }
 
     return emailData["text"];

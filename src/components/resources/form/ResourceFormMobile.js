@@ -1,7 +1,7 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import FormikField from "../../form-components/FormikField";
+import FormikField from "../../input/FormikField";
 import { CheckboxWithLabel } from 'formik-material-ui';
 import FileUploadBtn from '../../form-components/FileUploadBtn';
 import Button from '@material-ui/core/Button';
@@ -9,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import classNames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import styles from "../../../assets/material-kit-assets/jss/material-kit-react/views/landingPage.js";
-import {CustomHeader, Template} from "../.."
+import { CustomHeader, Template } from "../.."
 import Container from '@material-ui/core/Container';
 import firebase from "../../../firebase";
 import Categories from "./FormCategories"

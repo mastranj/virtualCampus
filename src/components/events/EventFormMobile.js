@@ -5,7 +5,7 @@ import { CircularProgress } from '@material-ui/core';
 import * as Events from './../../pages/events.js';
 
 //inputs
-import FormikField from "../form-components/FormikField";
+import FormikField from "../input/FormikField";
 import { CheckboxWithLabel, SimpleFileUpload } from "formik-material-ui";
 import { Select } from "material-ui-formik-components/Select";
 

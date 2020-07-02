@@ -1,6 +1,6 @@
 import React from "react"
-import {isMobile, isTablet, isEdge, isIE} from "react-device-detect";
-import ResourcesFormDesktop from "../../components/resources/form/ResourceFormDesktop";
+import { isMobile, isTablet, isEdge, isIE } from "react-device-detect";
+import ResourcesFormDesktop from "../../components/resources/form/ResourceFormDesktop1";
 import ResourcesFormMobile from "../../components/resources/form/ResourceFormMobile";
 
 class Index extends React.Component {
@@ -30,11 +30,11 @@ class Index extends React.Component {
         if (this.state.height === -1) {
             return (
                 <div>
-                    <ResourcesFormDesktop/>
+                    <ResourcesFormDesktop />
                 </div>
             );
         }
-        {/* For mobile's screen orientation update */}
+        {/* For mobile's screen orientation update */ }
         const isLandscape = this.state.width > this.state.height ? true : false;
 
         {/* If Tablet:
@@ -45,23 +45,23 @@ class Index extends React.Component {
             if (isLandscape) {
                 return (
                     <div>
-                        <ResourcesFormDesktop/>
+                        <ResourcesFormDesktop />
                     </div>
                 );
             } else {
                 return (
                     <div>
-                        <ResourcesFormMobile/>
+                        <ResourcesFormMobile />
                     </div>
                 );
             }
 
 
-            {/* For mobile component : IE or Edge must go to mobile since they do not support all css */}
+            {/* For mobile component : IE or Edge must go to mobile since they do not support all css */ }
         } else if (isMobile || (isLandscape === false && this.state.height > 700) || isIE || isEdge) {
             return (
                 <div>
-                    <ResourcesFormMobile/>
+                    <ResourcesFormMobile />
                 </div>
             );
 

@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import classNames from "classnames";
 
 import Grid from '@material-ui/core/Grid';
-import FormikField from "../form-components/FormikField"
+import FormikField from "../input/FormikField"
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,7 +35,9 @@ const ContactInfo = (props) => {
             required />
         </Grid>
         <Grid item sm={6}>
-          <FormikField label="Email" name="email"
+          <FormikField
+            name="email"
+            label="Email"
             error={props.errorEmail}
             touch={props.touchedEmail}
             required />

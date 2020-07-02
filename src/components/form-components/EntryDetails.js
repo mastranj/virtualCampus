@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import classNames from "classnames";
 
 import Grid from '@material-ui/core/Grid';
-import FormikField from "../form-components/FormikField"
+import FormikField from "../input/FormikField"
 import FileUploadBtn from '../form-components/FileUploadBtn'
 
 
@@ -31,8 +31,8 @@ const EntryDetails = (props) => {
       <Grid container spacing={2}>
         <Grid item sm={6}>
           <FormikField
-            label={props.entryTitle}
             name="title"
+            label={props.entryTitle}
             error={props.errorTitle}
             touch={props.touchedTitle}
             required
@@ -48,17 +48,17 @@ const EntryDetails = (props) => {
         </Grid> */}
         <Grid item sm={4}>
           <FormikField
+            name="image_link"
             label={props.fileName === "" ? "Logo / Image Link (Preferred: Imgur URL)" : props.fileName}
             error={props.errorImgLink}
             touch={props.touchedImgLink}
-            name="image_link"
             value={props.fileName}
           />
         </Grid>
         <Grid item sm={2}>
           <FileUploadBtn
-            text="Upload"
             name='image_file'
+            text="Upload"
             label='Image Upload'
             id="fileUpload"
             onChange={props.imgUpload}
@@ -67,7 +67,8 @@ const EntryDetails = (props) => {
       </Grid >
       <Grid container spacing={2}>
         <Grid item sm={12}>
-          <FormikField label="Event Description"
+          <FormikField
+            label="Description"
             name="desc"
             multiline rows="5"
             error={props.errorDesc}

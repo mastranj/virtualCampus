@@ -1,50 +1,61 @@
 import React from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { CircularProgress } from '@material-ui/core';
 
-//inputs
-import FormikField from "../form-components/FormikField";
-import { CheckboxWithLabel, SimpleFileUpload } from "formik-material-ui";
+// form settings
+import * as Yup from "yup";
+
+// Formik Plugin
+import { Formik, Form } from "formik";
+
+// form components
+import FormTitle from "../form-components/FormTitle"
+import ContactInfo from "../form-components/ContactInfo"
+import EntryDetails from "../form-components/EntryDetails"
+import Links from "../form-components/Links"
+import Tags from '../form-components/Tags'
+import AdditionalInfo from '../form-components/AdditionalInfo'
+import SubmitButton from '../form-components/SubmitButton'
+
+// manual inputs
+import { Field } from "formik"
 import { Select } from "material-ui-formik-components/Select";
 
-//Date and time input
+// Date and time plugin
 import { DateTimePicker } from "formik-material-ui-pickers";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
-import FileUploadBtn from '../form-components/FileUploadBtn'
+
+// material-ui components
 import Button from "@material-ui/core/Button";
 import Grid from '@material-ui/core/Grid';
-import { CustomHeader, Template } from "../";
+import { CircularProgress } from '@material-ui/core';
 import Container from "@material-ui/core/Container";
+import { CustomHeader, Template } from "../";
+
+// backend
 import * as firebase from "firebase";
 import Axios from "axios";
-
 import { getTimezoneOptions } from "../all/TimeFunctions"
 
 // set an init value first so the input is "controlled" by default
 const initVal = {
   name: "",
   email: "",
-  event: "",
-  desc: "",
-  other_tags: "",
+  title: "",
   image_file: "",
   image_link: "",
+  desc: "",
   start_date: "",
   end_date: "",
   timezone: "",
-  recurring: "",
-  event_link: "",
-  invite_link: "",
-  comments: "",
-  tag: "",
-  games_tag: "",
+  entry_link: "",
+  media_link: "",
   activism_tag: "",
   covid_tag: "",
   social_tag: "",
-  fitness_tag: "",
+  health_tag: "",
   education_tag: "",
+  other_tags: "",
+  comments: "",
   agree: ""
 
 };
@@ -52,37 +63,36 @@ const initVal = {
 
 const optionsTZ = getTimezoneOptions();
 
-
 // here you can add make custom requirements for specific input fields
 // you can add multiple rules as seen with the "name" scheme
 // you can also add custom feedback messages in the parameters of each error function
 const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(5, "Too Short")
-    .required("Required"),
-  email: Yup.string()
-    .email("Please enter a valid email address")
-    .required("Required"),
-  event_link: Yup.string()
-    .url("Please enter a valid URL")
-    .required("Required"),
-  event: Yup.string()
-    .required("Required"),
-  desc: Yup.string()
-    .required("Required")
-    .max("250", "Please less than 250 characters"),
-  start_date: Yup.string()
-    .required("Required"),
-  end_date: Yup.string()
-    .required("Required"),
-  timezone: Yup.string()
-    .required("Required"),
-  agree: Yup.boolean("True")
-    .required(),
-  image_link: Yup.string()
-    .trim().matches(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|png)/, 'Enter valid image url (Ends with .jpg, .png)'),
-  invite_link: Yup.string()
-    .url("Please enter a valid URL")
+  // name: Yup.string()
+  //   .min(5, "Too Short")
+  //   .required("Required"),
+  // email: Yup.string()
+  //   .email("Please enter a valid email address")
+  //   .required("Required"),
+  // entry_link: Yup.string()
+  //   .url("Please enter a valid URL")
+  //   .required("Required"),
+  // title: Yup.string()
+  //   .required("Required"),
+  // desc: Yup.string()
+  //   .required("Required")
+  //   .max("250", "Please less than 250 characters"),
+  // start_date: Yup.string()
+  //   .required("Required"),
+  // end_date: Yup.string()
+  //   .required("Required"),
+  // timezone: Yup.string()
+  //   .required("Required"),
+  // agree: Yup.boolean("True")
+  //   .required(),
+  // image_link: Yup.string()
+  //   .trim().matches(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|png)/, 'Enter valid image url (Ends with .jpg, .png)'),
+  // invite_link: Yup.string()
+  //   .url("Please enter a valid URL"),
 });
 
 const TITLE = "ADD EVENT";
@@ -173,25 +183,29 @@ class EventFormDesktop extends React.Component {
       errStatus: 0,
       activityIndicatory: false,
       imgFileValue: "",
+      imgurLink: "",
     };
 
     this.submitHandler = this.submitHandler.bind(this);
     this.uploadData = this.uploadData.bind(this);
     this.handleImageUpload = this.handleImageUpload.bind(this);
+    this.uploadImage = this.uploadImage.bind(this);
   }
 
   submitHandler(values) {
-    if (values["file"] !== "" && values["file"] !== undefined) {
-      this.uploadImage(values);
-    } else {
-      this.setState({ activityIndicatory: true });
-      const b = this.uploadData(values);
+    if (this.state.imgurLink != "") {
+      values['image_link'] = this.state.imgurLink
     }
+    this.setState({ activityIndicatory: true });
+    // const b = this.uploadData(values);
+    console.log(values)
   }
 
-  imgFileUploadHandler = (fileName) => {
-    console.log("congrats, you clicked me.")
-    console.log("Filename: " + fileName)
+  imgFileUploadHandler = (fileList) => {
+    const fileName = fileList[0].name
+    const file = fileList[0]
+
+    this.uploadImage(file)
     this.setState({
       imgFileValue: fileName
     })
@@ -274,34 +288,42 @@ class EventFormDesktop extends React.Component {
     return emailData["text"];
   }
 
-  uploadImage(values) {
-
+  uploadImage = (file) => {
+    let imgur = ""
     const r = new XMLHttpRequest();
     const d = new FormData();
-    // const e = document.getElementsByClassName('input-image')[0].files[0]
-    // var u
     const clientID = "df36f9db0218771";
 
-    d.append("image", values["file"]);
+    d.append("image", file);
 
     // Boilerplate for POST request to Imgur
     r.open("POST", "https://api.imgur.com/3/image/");
     r.setRequestHeader("Authorization", `Client-ID ${clientID}`);
-    r.onreadystatechange = function () {
+    r.onreadystatechange = () => {
       if (r.status === 200 && r.readyState === 4) {
         let res = JSON.parse(r.responseText);
         // this is the link to the uploaded image
-        let imgur = `https://i.imgur.com/${res.data.id}.png`;
+        imgur = `https://i.imgur.com/${res.data.id}.png`;
+        // console.log(imgur)
 
-        values["file"] = imgur;
-        this.uploadData(values);
-
+        this.setState({ imgurLink: imgur })
       }
     };
     // send POST request to Imgur API
     r.send(d);
+  }
 
-    return true;
+  getFileName() {
+    if (this.state.imgFileValue !== "") {
+      return this.state.imgFileValue;
+    }
+    return ""
+  }
+
+  handleImageUpload() {
+    console.log(this.inputElement);
+    this.inputElement.props.label = "Image Uploaded";
+    this.inputElement.touch = true;
   }
 
   getHeadMessage() {
@@ -334,18 +356,6 @@ class EventFormDesktop extends React.Component {
     }
   }
 
-  getFileName() {
-    if (this.state.imgFileValue !== "") {
-      return this.state.imgFileValue;
-    }
-    return ""
-  }
-
-  handleImageUpload() {
-    console.log(this.inputElement);
-    this.inputElement.props.label = "Image Uploaded";
-    this.inputElement.touch = true;
-  }
 
   render() {
     if (this.state.activityIndicatory) {
@@ -412,297 +422,104 @@ class EventFormDesktop extends React.Component {
         <Template title={'Add New Event'} active={"schedule"}>
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             {/* <Template active={'schedule'}> */}
-            <div>
-              <div style={{ backgroundColor: "white" }}>
-                <Container>
-                  {/* <div className={classes.container} style={{ paddingTop: '85px' }}> */}
-                  <Grid container spacing={10}>
-                    <Grid item xs={4}>
-                      <div style={{
-                        fontFamily: "Poppins", fontStyle: "normal", fontWeight: "normal",
-                        fontSize: "36px", lineHeight: "54px", color: "#0072CE"
-                      }}>
-                        Host a New Event
-                      </div>
-                      <div style={{
-                        fontFamily: "Poppins", fontStyle: "normal", fontWeight: "normal",
-                        fontSize: "14px", lineHeight: "21px"
-                      }}>
-                        Thank you for your interest in leading a virtual event or activity
-                        through
-                        CVC.
-                        Please fill out the following form so we can provide you with the
-                        necessary
-                        resources and appropriate platform on our website!
-                      </div>
-                      <div style={{
-                        fontFamily: "Poppins", fontStyle: "normal", fontWeight: "normal",
-                        fontSize: "14px", lineHeight: "21px", paddingTop: "66px"
-                      }}>
-                        Questions? Contact us at <br />
-                        <a href='mailto:columbiavirtualcampus@gmail.com'>columbiavirtualcampus@gmail.com</a>.
-                      </div>
-                    </Grid>
-                    <Grid item xs={8}>
-                      <Formik
-                        initialValues={initVal}
-                        onSubmit={this.submitHandler}
-                        validationSchema={validationSchema}
-                      >
-                        {({ dirty, isValid, errors, touched }) => {
-                          return (
-                            <Form>
-                              <div style={{ margin: "15px 0" }}>
-                                <div style={{
-                                  fontFamily: "Poppins",
-                                  fontStyle: "normal",
-                                  fontWeight: "normal",
-                                  fontSize: "20px",
-                                  lineHeight: "30px",
-                                  color: "#0072CE"
-                                }}>
-                                  Contact
+            <div style={{ backgroundColor: "white" }}>
+              <Container>
+                {/* <div className={classes.container} style={{ paddingTop: '85px' }}> */}
+                <Grid container spacing={10}>
+                  <FormTitle
+                    title="Host a New Event"
+                    desc="Thank you for your interest in leading a virtual event or activity through CVC. Please fill out the following form so we can provide you with the necessary resources and appropriate platform on our website!"
+                  />
+                  <Grid item xs={8}>
+                    <Formik
+                      initialValues={initVal}
+                      onSubmit={this.submitHandler}
+                      validationSchema={validationSchema}
+                    >
+                      {({ errors, touched }) => {
+                        return (
+                          <Form>
+                            <ContactInfo
+                              errorName={errors.name}
+                              touchedName={touched.name}
+                              errorEmail={errors.email}
+                              touchedEmail={touched.email}
+                            />
+                            <EntryDetails
+                              title={"Event"}
+                              entryTitle={"Event Name"}
+                              imgUpload={this.imgFileUploadHandler}
+                              fileName={this.getFileName()}
+
+                              errorTitle={errors.title}
+                              touchedTitle={touched.title}
+
+                              errorImgLink={errors.image_link}
+                              touchedImgLink={touched.image_link}
+
+                              errorDesc={errors.desc}
+                              touchedDesc={touched.desc}
+                            />
+                            <Grid container spacing={2}>
+                              <Grid item sm={3}>
+                                <div style={{ margin: "16px 0 8px" }}>
+                                  <Field
+                                    component={DateTimePicker}
+                                    name="start_date"
+                                    label="Start Time"
+                                    required
+                                  />
                                 </div>
-                                <Grid container spacing={2}>
-                                  <Grid item sm={6}>
-                                    <FormikField label="Name / Organization"
-                                      name="name"
-                                      error={errors.name}
-                                      touch={touched.name}
-                                      required></FormikField>
-                                  </Grid>
-                                  <Grid item sm={6}>
-                                    <FormikField label="Email" name="email"
-                                      error={errors.email}
-                                      touch={touched.email}
-                                      required></FormikField>
-                                  </Grid>
-                                </Grid >
-                              </div>
-
-
-                              <div style={{ margin: "15px 0" }}>
-                                <div style={{
-                                  fontFamily: "Poppins",
-                                  fontStyle: "normal",
-                                  fontWeight: "normal",
-                                  fontSize: "20px",
-                                  lineHeight: "30px",
-                                  color: "#0072CE"
-                                }}>
-                                  Event
+                              </Grid>
+                              <Grid item sm={3}>
+                                <div style={{ margin: "16px 0 8px" }}>
+                                  <Field
+                                    component={DateTimePicker}
+                                    name="end_date"
+                                    label="End Time"
+                                    required
+                                  />
                                 </div>
-                                <Grid container spacing={2}>
-                                  <Grid item sm={6}>
-                                    <FormikField label="Event Name" name="event"
-                                      error={errors.event}
-                                      touch={touched.event}
-                                      required></FormikField>
-                                  </Grid>
-                                  <Grid item sm={6}>
-                                    <FormikField label="Logo / Image Link (Preferred: Imgur URL)"
-                                      name="image_link"
-                                      error={errors.image_link}
-                                      touch={touched.image_link}
-                                    />
-                                  </Grid>
-                                  {/*<Grid item sm={4}>
-                                    <FormikField label={this.getFileName() === "" ? "Logo / Image Link (Preferred: Imgur URL)" : this.getFileName()}
-
-                                      name="image_link"
-                                      error={errors.image_link}
-                                      touch={touched.image_link}
-                                      value={this.getFileName()}
-                                    />
-                                  </Grid>
-                                  <Grid item sm={2}> */}
-                                  {/* <Field component={SimpleFileUpload} name="file" className="input-image" label="Image Upload" /> */}
-                                  {/*<FileUploadBtn text="Upload" name='file' label='Image Upload' id="fileUpload" onChange={this.imgFileUploadHandler} />
-                                  </Grid>*/}
-                                </Grid >
-
-                                <Grid container spacing={2}>
-                                  <Grid item sm={12}>
-                                    <FormikField label="Event Description"
-                                      name="desc"
-                                      multiline rows="5"
-                                      error={errors.desc}
-                                      touch={touched.desc} required />
-                                  </Grid>
-                                </Grid >
-                                <Grid container spacing={2}>
-                                  <Grid item sm={3}>
-                                    <div style={{ margin: "16px 0 8px" }}>
-                                      <Field
-                                        component={DateTimePicker}
-                                        name="start_date"
-                                        label="Start Time"
-                                        required
-                                      />
-                                    </div>
-                                  </Grid>
-                                  <Grid item sm={3}>
-                                    <div style={{ margin: "16px 0 8px" }}>
-                                      <Field
-                                        component={DateTimePicker}
-                                        name="end_date"
-                                        label="End Time"
-                                        required
-                                      />
-                                    </div>
-                                  </Grid>
-                                  <Grid item sm={3}>
-
-                                    <Field
-                                      name="timezone"
-                                      label="Select Timezone"
-                                      options={optionsTZ}
-                                      component={Select}
-                                      required
-                                    />
-
-                                  </Grid>
-                                </Grid >
-                                <Grid container spacing={2}>
-                                  <Grid item sm={6}>
-                                    <FormikField label="Website / Event Link"
-                                      name="event_link"
-                                      error={errors.event_link}
-                                      touch={touched.event_link}
-                                      required />
-                                  </Grid>
-                                  <Grid item sm={6}>
-                                    <FormikField
-                                      label="Video Call / Media Link (Zoom, Twitch, etc.)"
-                                      name="invite_link" />
-                                  </Grid>
-                                </Grid >
+                              </Grid>
+                              <Grid item sm={3}>
                                 <Field
-                                  component={CheckboxWithLabel}
-                                  name="zoomLink"
-                                  Label={{ label: "Request a Zoom Pro link (Only valid if no Video Call link given)" }}
-                                  type="checkbox"
-                                  indeterminate={false}
-                                />
-                                <br />
-                                <Grid container spacing={2}>
-                                  <Grid item sm={1}>
-                                    <div style={{ paddingTop: "9px" }}>Tags</div>
-                                  </Grid>
-                                  <Grid item sm={11}>
-                                    <Field
-                                      component={CheckboxWithLabel}
-                                      name="activism_tag"
-                                      Label={{ label: "Activism" }}
-                                      type="checkbox"
-                                      indeterminate={false}
-                                    />
-                                    <Field
-                                      component={CheckboxWithLabel}
-                                      name="covid_tag"
-                                      Label={{ label: "COVID" }}
-                                      type="checkbox"
-                                      indeterminate={false}
-                                    />
-                                    <Field
-                                      component={CheckboxWithLabel}
-                                      name="social_tag"
-                                      Label={{ label: "Social" }}
-                                      type="checkbox"
-                                      indeterminate={false}
-                                    />
-                                    <Field
-                                      component={CheckboxWithLabel}
-                                      name="health_tag"
-                                      Label={{ label: "Health" }}
-                                      type="checkbox"
-                                      indeterminate={false}
-                                    />
-                                    <Field
-                                      component={CheckboxWithLabel}
-                                      name="education_tag"
-                                      Label={{ label: "Education" }}
-                                      type="checkbox"
-                                      indeterminate={false}
-                                    />
-                                  </Grid>
-                                </Grid >
-                                <Grid container spacing={2}>
-                                  <Grid item sm={12}>
-                                    <FormikField label="Other Tags (Seperate each by semicolon)"
-                                      placeholder="Separate Each Tag by Semicolon"
-                                      name="other_tags" />
-                                  </Grid>
-                                </Grid >
-                              </div>
-
-
-                              <div style={{ margin: "15px 0" }}>
-                                <div style={{
-                                  fontFamily: "Poppins",
-                                  fontStyle: "normal",
-                                  fontWeight: "normal",
-                                  fontSize: "20px",
-                                  lineHeight: "30px",
-                                  color: "#0072CE"
-                                }}>
-                                  Additional
-                                  Information
-                                </div>
-                                <Grid container spacing={2}>
-                                  <Grid item sm={12}>
-                                    <FormikField label="Comments" name="comments"
-                                      multiline
-                                      rows="5" error={errors.comments}
-                                      touch={touched.comments} />
-                                  </Grid>
-                                </Grid >
-                                <div>
-                                  By hosting an event you agree to the <a
-                                    href="https://bit.ly/events-policy-docs"
-                                    target="_blank">Columbia Events Policy</a>.
-                                </div>
-                                <Field
-                                  component={CheckboxWithLabel}
-                                  name="agree"
-                                  Label={{ label: "I agree to the Columbia Events Policy" }}
-                                  type="checkbox"
-                                  indeterminate={false}
+                                  name="timezone"
+                                  label="Select Timezone"
+                                  options={optionsTZ}
+                                  component={Select}
                                   required
                                 />
-                              </div>
+                              </Grid>
+                            </Grid >
+                            <Links
+                              entryLinkError={errors.entry_link}
+                              entryLinkTouched={touched.entry_link}
 
-                              <Grid container spacing={2}>
-                                <Grid item sm={3}>
-                                  <Button
-                                    style={{
-                                      background: "white",
-                                      border: "1px solid #FB750D",
-                                      borderRadius: "10px",
-                                      boxSizing: "border-box",
-                                      color: "#FB750D",
-                                      boxShadow: "none",
-                                      width: "100%"
-                                    }}
-                                    type="submit">
-                                    Submit
-                                  </Button>
-                                </Grid>
-                              </Grid >
-                            </Form>
-                          );
-                        }}
-                      </Formik>
-                    </Grid>
-                  </Grid >
-                  <div style={{ marginBottom: "50px" }} />
-                  {/* </div> */}
-                </Container>
-              </div>
+                              mediaLinkError={errors.media_link}
+                              mediaLinkTouched={touched.media_link}
+                            />
+                            <Tags
+                              tags={['Activism', 'COVID', 'Social', 'Health', 'Education']}
+                              title={"Tags"}
+                              otherTagsTouched={touched.other_tags}
+                              required
+                            />
+                            <AdditionalInfo
+                              touchedComments={touched.comments}
+                              policyLink={"https://bit.ly/events-policy-docs"}
+                            />
+                            <SubmitButton />
+                          </Form>
+                        )
+                      }}
+                    </Formik>
+                  </Grid>
 
-
+                </Grid >
+                <div style={{ marginBottom: "50px" }} />
+                {/* </div> */}
+              </Container>
             </div>
-
             {/* </Template > */}
           </MuiPickersUtilsProvider>
         </Template>

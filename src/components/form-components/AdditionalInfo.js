@@ -4,7 +4,7 @@ import classNames from "classnames";
 
 import { Field } from "formik";
 import Grid from '@material-ui/core/Grid';
-import FormikField from "../form-components/FormikField"
+import FormikField from "../input/FormikField"
 import { CheckboxWithLabel } from "formik-material-ui";
 
 const useStyles = makeStyles(() => ({
@@ -43,14 +43,15 @@ const AdditionalInfo = (props) => {
         </Grid>
       </Grid>
       <div style={{ margin: '15px 0 0 0' }}>
-        By hosting an event you agree to the <a
-          href="https://bit.ly/events-policy-docs"
-          target="_blank">Columbia Events Policy</a>.
+        By adding this {props.title} you agree to the <a
+          // href="https://bit.ly/events-policy-docs"
+          href={props.policyLink}
+          target="_blank">Columbia Virtual Campus Policies</a>.
       </div>
       <Field
         component={CheckboxWithLabel}
         name="agree"
-        Label={{ label: "I agree to the Columbia Events Policy." }}
+        Label={{ label: "I agree to the CVC Policies." }}
         type="checkbox"
         indeterminate={false}
         color="default"

@@ -314,7 +314,6 @@ class HandleApprove extends React.Component {
     }
     updateToken(data) {
         this.setState({token: data.target.value})
-        console.log(data.target.value)
     }
     render() {
 

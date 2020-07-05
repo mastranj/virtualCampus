@@ -48,37 +48,40 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
 
 });
 
-exports.approveEvent = functions.https.onRequest((req, res) => {
+exports.approveEvent2 = functions.https.onRequest((req, res) => {
     cors(req,
         res, () => {
             if (req.method !== 'GET') {
                 return;
             }
+            if (!req.query.tok || req.query.tok !== process.env.ADMIN_EVENTS_TOKEN) {
+                return;
+            }
             var db = admin.firestore();
             db.collection('events').doc(req.query.eventId).update({ approved: true })
                 .then(() => {
-                    return res.status(200).send("success");
+                    return res.status(200).send("Event " + req.query.eventId + " approved.");
                 }).catch((err) => {
                 return res.status(500).send(err);
             });
         });
 });
-
-exports.sendZoomRequest = functions.https.onRequest(async (req, res) => {
-
-    cors(req, res, async () => {
-        console.log(req.body);
-        const request = require('request-promise');
-
-        request.post(req.body,
-            function (err, httpResponse, body) {
-                console.log(err);
-                if (body.error) {
-                    return res.status(403).send("failed posting to call zoom api: " + body.error);
-                }
-
-                return res.status(200).send(body);
-            }
-        );
-    })
-});
+//
+// exports.sendZoomRequest = functions.https.onRequest(async (req, res) => {
+//
+//     cors(req, res, async () => {
+//         console.log(req.body);
+//         const request = require('request-promise');
+//
+//         request.post(req.body,
+//             function (err, httpResponse, body) {
+//                 console.log(err);
+//                 if (body.error) {
+//                     return res.status(403).send("failed posting to call zoom api: " + body.error);
+//                 }
+//
+//                 return res.status(200).send(body);
+//             }
+//         );
+//     })
+// });
